@@ -1,0 +1,20 @@
+.bookmark_folder_popup_list::-webkit-scrollbar {
+    width: 2px;
+}
+
+.bookmark_folder_popup_list::-webkit-scrollbar-thumb {
+    background-color: darkgrey;
+    outline: 1px solid slategrey;
+}
+
+.bookmark_folder_popup_list .bookmark_folder_popup_search_input:focus{
+    box-shadow: none !important;
+    border: 1px #cacaca solid !important;
+}
+
+.bookmark_folder_popup_list_name:hover + .actionDiv {display: block !important;}
+
+.actionDiv:hover {display: block !important;}
+
+
+.bookmark_folder_popup_list_name:hover > span{ font-size:15px !important; font-weight:bold !important}

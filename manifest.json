@@ -1,0 +1,62 @@
+{
+  "name": "Post2Bookmarks.AI - Linkedin Save Post",
+  "short_name": "Post2Bookmarks.AI",
+  "author": "Pruthviraj Jadhav",
+  "description": "This extension allows you to inteligently categorise & save posts with a single click. It integrates seamlessly with your browser and uses Ollama's AI-powered categorization to organize your bookmarks into relevant folders.",
+  "version": "0.0.1",
+  "manifest_version": 3,
+  "icons": {
+    "16": "images/icon.png",
+    "19": "images/icon.png",
+    "32": "images/icon.png",
+    "38": "images/icon.png",
+    "64": "images/icon.png",
+    "128": "images/icon.png"
+  
+  },
+      "action": {
+     "default_icon": "images/icon.png",
+      "default_popup": "popup.html"
+  },
+ "background": {
+		"service_worker": "js/background.js",
+    "type": "module"
+	},
+
+    "content_scripts": [
+    {
+      "js": [
+	      "js/jquery.min.js",
+        "js/content.js",
+        "js/llmIntegration.js",
+        "js/bookmarkManager.js"
+      ],
+	  "css": [
+	   "css/style.css"
+      ],
+      "matches": [
+        "https://www.linkedin.com/*"
+      ],
+	  "run_at": "document_end"
+    }],
+	"permissions": [
+		"bookmarks"
+	],
+  "host_permissions": [
+    "http://localhost/*",
+    "https://localhost/*"
+  ],
+	"web_accessible_resources": [
+		{
+			"resources": [
+				"images/*"
+			],
+			"matches": [
+				"http://*/*",
+				"https://*/*"
+			]
+		}
+
+	]
+   
+}
