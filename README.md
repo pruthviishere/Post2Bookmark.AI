@@ -20,13 +20,19 @@ Installation
 Clone or download the repository:
 
  
-git clone
+git releases 
+download zip 
 Open Chrome and go to:
 chrome://extensions/
 
 Enable Developer Mode (top-right corner).
 
 Click Load Unpacked and select the folder where you cloned this repository.
+
+Allow ollama access 
+All bookmarks are stored locally on your machine.
+make sure llama3.2:latest is install and running as ollama device
+https://github.com/ollama/ollama/issues/4115#issuecomment-2254177024
 
 The extension is now ready to use! 🎉
 
