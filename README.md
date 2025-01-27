@@ -1,7 +1,7 @@
 # Post2Bookmark.AI
 
 
-📌  A lightweight Chrome extension that helps you save and categorize posts with a single click. Built for professionals, learners, and developers, it uses AI categorization to organize your bookmarks for easy access—all while keeping your data private and secure.
+📌  A lightweight Chrome extension that helps you save and categorize posts with a single click.it uses AI categorization to organize your bookmarks for easy access—all while keeping your data private and secure.
 
 
 🌟 Features
@@ -13,15 +13,19 @@ Privacy First: Your data stays local. No external servers, no data collection.
 
 Custom Folders: Organize your bookmarks into folders for better management.
 
-Lightweight and Fast: No unnecessary bloat—just the tools you need.
+prerequisites: Ollama , llama 3.2:latest
+if you are running other you need to change llmIntegration.js Method 
+categorizeTextOllamaCustom Line no 102 with your ollama model.
+
+Will add support for OpenAI API and other providers.
+
 
 🚀 Getting Started
 Installation
-Clone or download the repository:
 
- 
+
 git releases 
-download zip 
+download zip or clone repo
 Open Chrome and go to:
 chrome://extensions/
 
@@ -33,6 +37,7 @@ Allow ollama access
 All bookmarks are stored locally on your machine.
 make sure llama3.2:latest is install and running as ollama device
 https://github.com/ollama/ollama/issues/4115#issuecomment-2254177024
+after the executing command you need to restart Ollama.
 
 The extension is now ready to use! 🎉
 
@@ -65,6 +70,7 @@ All bookmarks are stored locally on your machine.
 
 
 🤝 Contributing
+It is in development phase you might encounter issue, please report in Issues section.
 Contributions are welcome! If you have ideas, suggestions, or want to improve the extension:
 
 Fork the repository.
