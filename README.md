@@ -3,12 +3,18 @@
 
 📌  A lightweight Chrome extension that helps you save and categorize posts with a single click. Built for professionals, learners, and developers, it uses AI categorization to organize your bookmarks for easy access—all while keeping your data private and secure.
 
+
 🌟 Features
 Save Posts Instantly: A dedicated "Save" button makes bookmarking seamless.
+
 AI-Powered Categorization: Automatically sorts bookmarks into relevant folders using advanced AI models (powered by Ollama).
+
 Privacy First: Your data stays local. No external servers, no data collection.
+
 Custom Folders: Organize your bookmarks into folders for better management.
+
 Lightweight and Fast: No unnecessary bloat—just the tools you need.
+
 🚀 Getting Started
 Installation
 Clone or download the repository:
@@ -45,9 +51,13 @@ The extension uses Ollama AI models to categorize the post into pre-defined cate
 And more!
 Saved bookmarks are stored locally in your browser’s Bookmark Manager under the folder “Post2Bookmark.AI”.
 
+
 🔐 Privacy Policy
 This extension does not collect, track, or send user data to any external servers.
+
 All bookmarks are stored locally on your machine.
+
+
 🤝 Contributing
 Contributions are welcome! If you have ideas, suggestions, or want to improve the extension:
 
@@ -55,6 +65,7 @@ Fork the repository.
 Make your changes.
 Submit a pull request.
 We’d love to hear from you!
+
 
 🧠 Powered By
 Ollama: AI-based categorization.
