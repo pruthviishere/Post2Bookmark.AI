@@ -40,7 +40,8 @@
 	  "run_at": "document_end"
     }],
 	"permissions": [
-		"bookmarks"
+		"bookmarks",
+    "storage"
 	],
   "host_permissions": [
     "http://localhost/*",

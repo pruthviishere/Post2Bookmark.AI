@@ -5,6 +5,30 @@
     text-align: center;
     color: #38a5c5;
     font-weight: 500;">A lightweight Chrome extension that helps you save and categorize posts with a single click. </div>
+    
+<div style="margin: 12px;">
+    <h3>API Settings</h3>
+    <label for="provider">Choose API Provider:</label>
+    <select id="provider">
+        <option value="ollama">Ollama</option>
+        <option value="openai">OpenAI</option>
+        <option value="bedrock">AWS Bedrock</option>
+        <option value="gemini">Gemini</option>
+        <option value="groq">Groq</option>
+    </select>
+
+    <label for="model">Model:</label>
+    <input type="text" id="model" placeholder="Enter Model Name" />
+
+    <label for="apiKey">API Key:</label>
+    <input type="text" id="apiKey" placeholder="Enter API Key" />
+
+    <label for="apiUrl">API URL:</label>
+    <input type="text" id="apiUrl" placeholder="Enter API URL (if needed)" />
+
+    <button id="saveApiSettings">Save</button>
+</div>
+
 
 <div style="text-align: center;
     font-size: 14px;
