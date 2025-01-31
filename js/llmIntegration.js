@@ -235,6 +235,10 @@ async function categorizeWithGemini(prompt, model, apiKey) {
 }
 
 async function categorizeWithGroq(prompt, model, apiKey, apiUrl) {
+    if( apiUrl=="http://localhost:11434/api/chat" || !apiKey){
+        apiUrl = "https://api.groq.com/openai/v1/chat/completions"
+        console.log("categorizeWithGroq api url was not valid setting default one https://api.groq.com/openai/v1/chat/completions")
+    }
     return await callApi(apiUrl, apiKey, { model, messages: [{ role: "user", content: prompt }] });
 }
 

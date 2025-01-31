@@ -5,13 +5,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const apiUrlInput = document.getElementById("apiUrl");
     const saveButton = document.getElementById("saveApiSettings");
 
-    // Load saved settings
+    // Load saved settings from storage
     chrome.storage.sync.get(["provider", "model", "apiKey", "apiUrl"], (data) => {
-        providerSelect.value = data.provider || "ollama";
-        modelInput.value = data.model || "";
-        apiKeyInput.value = data.apiKey || "";
-        apiUrlInput.value = data.apiUrl || "";
+        if (data.provider) providerSelect.value = data.provider;
+        if (data.model) modelInput.value = data.model;
+        if (data.apiKey) apiKeyInput.value = data.apiKey;
+        if (data.apiUrl) apiUrlInput.value = data.apiUrl;
     });
+
 
     saveButton.addEventListener("click", () => {
         const provider = providerSelect.value;
