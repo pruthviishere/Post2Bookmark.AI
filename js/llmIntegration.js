@@ -239,7 +239,7 @@ async function categorizeWithGroq(prompt, model, apiKey, apiUrl) {
         apiUrl = "https://api.groq.com/openai/v1/chat/completions"
         console.log("categorizeWithGroq api url was not valid setting default one https://api.groq.com/openai/v1/chat/completions")
     }
-    return await callApi(apiUrl, apiKey, { model, messages: [{ role: "user", content: prompt }] });
+    return await callApi(apiUrl, apiKey, { model, messages: [{ role: "user", content: prompt }],   response_format:{type: "json_object"}  });
 }
 
 async function callApi(apiUrl, apiKey, bodyData) {
@@ -256,11 +256,19 @@ async function callApi(apiUrl, apiKey, bodyData) {
             headers,
             body: JSON.stringify(bodyData),
         });
+            
+        // if (!response.ok) throw new Error(`API Error: ${response.status}`);
 
-        if (!response.ok) throw new Error(`API Error: ${response.status}`);
-
+        if (!response.ok) {
+            console.error("API call failed with status:", response.status); // Debug: Check HTTP status
+            const responseText = await response.text();
+            console.error("API call failed with response:", responseText); // Debug: Check http body
+            return "FailedBookmarks"
+            // throw new Error(`API request failed with status ${response.status}`);
+          }
+      
         // const data = await response.json();
-
+        textResponse = await response.text()
         console.log("Raw API Response:", textResponse); // <- Log the string
         try{
            const data = JSON.parse(textResponse);

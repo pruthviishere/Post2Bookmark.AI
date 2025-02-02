@@ -18,6 +18,9 @@ chrome.runtime.onMessage.addListener(
 
         categorizePostMulti(text)
 				.then(({ category }) => {
+          if (!category) {
+              category = "FailedBookmarksFolder";
+          }
 					const reqDto = {
 						category, // Folder name
 						title: text.slice(0, 50), // Optional: Generate a title from text
