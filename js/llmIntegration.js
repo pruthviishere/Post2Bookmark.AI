@@ -105,6 +105,7 @@ export function categorizePostMulti(text) {
         You are a LinkedIn post categorization system.
         Categorize the text into one of these categories:
         Job Opportunity in AI/ML/DS, Software Engineer, AI Agents, Interview Prep, GitHub Repos, etc.
+        response format json.
         Return JSON format: {"category": "<CATEGORY_NAME>"}
         Post text: "${text}"
     `;
@@ -239,7 +240,7 @@ async function categorizeWithGroq(prompt, model, apiKey, apiUrl) {
         apiUrl = "https://api.groq.com/openai/v1/chat/completions"
         console.log("categorizeWithGroq api url was not valid setting default one https://api.groq.com/openai/v1/chat/completions")
     }
-    return await callApi(apiUrl, apiKey, { model, messages: [{ role: "user", content: prompt }],   response_format:{type: "json_object"}  });
+    return await callApi(apiUrl, apiKey, { model,stream: false, messages: [{ role: "user", content: prompt }],   response_format:{type: "json_object"}  });
 }
 
 async function callApi(apiUrl, apiKey, bodyData) {
@@ -268,7 +269,7 @@ async function callApi(apiUrl, apiKey, bodyData) {
           }
       
         // const data = await response.json();
-        textResponse = await response.text()
+        const textResponse = await response.text()
         console.log("Raw API Response:", textResponse); // <- Log the string
         try{
            const data = JSON.parse(textResponse);
