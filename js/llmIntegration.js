@@ -235,12 +235,13 @@ async function categorizeWithGemini(prompt, model, apiKey) {
     return await callApi(apiUrl, apiKey, { prompt });
 }
 
-async function categorizeWithGroq(prompt, model, apiKey, apiUrl) {
+ function categorizeWithGroq(prompt, model, apiKey, apiUrl) {
     if( apiUrl=="http://localhost:11434/api/chat" || !apiKey){
         apiUrl = "https://api.groq.com/openai/v1/chat/completions"
         console.log("categorizeWithGroq api url was not valid setting default one https://api.groq.com/openai/v1/chat/completions")
     }
-    return await callApi(apiUrl, apiKey, { model,stream: false, messages: [{ role: "user", content: prompt }],   response_format:{type: "json_object"}  });
+    let bodyData = { model,stream: false, messages: [{ role: "user", content: prompt }],   response_format:{type: "json_object"},stop:null  }
+    return  callApi(apiUrl, apiKey, bodyData);
 }
 
 async function callApi(apiUrl, apiKey, bodyData) {
@@ -258,25 +259,13 @@ async function callApi(apiUrl, apiKey, bodyData) {
             body: JSON.stringify(bodyData),
         });
             
-        // if (!response.ok) throw new Error(`API Error: ${response.status}`);
+        if (response.ok) {
+            const data = await response.json();
+            console.log(data.choices[0].message?.content, '<---- groq.com api');
 
-        if (!response.ok) {
-            console.error("API call failed with status:", response.status); // Debug: Check HTTP status
-            const responseText = await response.text();
-            console.error("API call failed with response:", responseText); // Debug: Check http body
-            return "FailedBookmarks"
-            // throw new Error(`API request failed with status ${response.status}`);
-          }
-      
-        // const data = await response.json();
-        const textResponse = await response.text()
-        console.log("Raw API Response:", textResponse); // <- Log the string
-        try{
-           const data = JSON.parse(textResponse);
-           return { category: data.choices?.[0]?.text.trim() || "Miscellaneous" };
-        } catch (e){
-           console.log("JSON parse error ", e)
-           return "FailedBookmarks"
+            return JSON.parse(data.choices[0].message?.content);
+        } else {
+            console.error(await response.json());
         }
         
     } catch (error) {
