@@ -1,6 +1,6 @@
  
 import { handleBookmarkCreation } from './bookmarkManager.js';
-import { categorizePost } from './llmIntegration.js';
+import { categorizePost,categorizePostMulti } from './llmIntegration.js';
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
@@ -14,8 +14,13 @@ chrome.runtime.onMessage.addListener(
         }
         const { link, text } = reqDto; // Safely destructure the `reqDto` object
         console.log("Processing bookmark with:", { link, text });
-			categorizePost(text,true)
+        // categorizePost(text)
+
+        categorizePostMulti(text)
 				.then(({ category }) => {
+          if (!category) {
+              category = "FailedBookmarksFolder";
+          }
 					const reqDto = {
 						category, // Folder name
 						title: text.slice(0, 50), // Optional: Generate a title from text
@@ -69,6 +74,20 @@ chrome.runtime.onInstalled.addListener((details) => {
 	if (details.reason === "install" || details.reason === 'update') {
         // createPersonalBookmarkFolder();
     }
+
+    chrome.storage.sync.get(["provider", "model", "apiKey", "apiUrl"], (settings) => {
+      if (!settings.provider) {
+          chrome.storage.sync.set({
+              provider: "ollama",
+              model: "llama3.2",
+              apiKey: "",
+              apiUrl: "http://localhost:11434/api/chat"
+          }, () => {
+              console.log("Default API settings saved.");
+              console.log("ollama llama3.2 http://localhost:11434/api/chat");
+          });
+      }
+  });
 });
  
 

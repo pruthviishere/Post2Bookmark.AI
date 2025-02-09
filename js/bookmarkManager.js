@@ -5,7 +5,7 @@
  * @returns {object|null} - Found folder object or null.
  */
 function findFolderByName(bookmarks, folderName) {
-    console.log("findFolderByName folderName:",folderName)
+    // console.log("findFolderByName folderName:",folderName)
     for (let bookmark of bookmarks) {
         if (bookmark.title === folderName) {
             console.log("bookmark found",bookmark)
