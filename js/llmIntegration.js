@@ -141,7 +141,7 @@ export function categorizePostMulti(text) {
                     categorizeWithBedrock(prompt,  model,  apiKey,  apiUrl).then(resolve).catch(reject);
                     break;
                 case "gemini":
-                    categorizeWithGemini(prompt,  model,  apiKey).then(resolve).catch(reject);
+                    generateContentWithGemini(prompt,  model,  apiKey).then(resolve).catch(reject);
                     break;
                 case "groq":
                     categorizeWithGroq(prompt,  model,  apiKey,  apiUrl).then(resolve).catch(reject);
@@ -222,8 +222,16 @@ async function categorizeWithOllama(prompt, model) {
 }
 
 async function categorizeWithOpenAI(prompt, model, apiKey) {
-    const apiUrl = "https://api.openai.com/v1/completions";
-    return await callApi(apiUrl, apiKey, { model, prompt });
+     
+    const apiUrl = "https://api.openai.com/v1/chat/completions";  // ✅ Correct endpoint
+
+    const bodyData = {
+        model,
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }
+    };
+    // return await callApi(apiUrl, apiKey, { model, prompt });
+    return await callApi(apiUrl, apiKey, bodyData);
 }
 
 async function categorizeWithBedrock(prompt, model, apiKey, apiUrl) {
@@ -234,13 +242,72 @@ async function categorizeWithGemini(prompt, model, apiKey) {
     const apiUrl = `https://generativelanguage.googleapis.com/v1/models/${model}:generateText`;
     return await callApi(apiUrl, apiKey, { prompt });
 }
+async function generateContentWithGemini(prompt, model, apiKey) {
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+    const bodyData = {
+        contents: [{
+            parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+            response_mime_type: "application/json"
+        }
+    };
+
+    return await callGeminiApi(apiUrl, bodyData);
+}
+
+async function callGeminiApi(apiUrl, bodyData) {
+    try {
+        const headers = {
+            "Content-Type": "application/json"
+        };
+
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(bodyData),
+        });
+
+        if (!response.ok) {
+            console.error("Error:", response.status, await response.text());
+            return null;
+        }
+
+        const data = await response.json();
+
+        // ✅ Extract response correctly
+        if (data.candidates && data.candidates.length > 0) {
+            const responseText = data.candidates[0].content.parts[0].text;
+            console.log("Gemini API Response:", responseText);
+
+            try {
+                return JSON.parse(responseText);  // ✅ Convert text response to JSON
+            } catch (e) {
+                console.warn("Response is not valid JSON, returning as string.");
+                return responseText;
+            }
+        } else {
+            console.error("Unexpected response structure:", data);
+            return null;
+        }
+    } catch (error) {
+        console.error("API call failed:", error);
+        return "FailedBookmarks";
+    }
+}
 
  function categorizeWithGroq(prompt, model, apiKey, apiUrl) {
     if( apiUrl=="http://localhost:11434/api/chat" || !apiKey){
         apiUrl = "https://api.groq.com/openai/v1/chat/completions"
         console.log("categorizeWithGroq api url was not valid setting default one https://api.groq.com/openai/v1/chat/completions")
     }
-    let bodyData = { model,stream: false, messages: [{ role: "user", content: prompt }],   response_format:{type: "json_object"},stop:null  }
+    let bodyData = { 
+        model,
+        stream: false, 
+        messages: [{ role: "user", content: prompt }],
+        response_format:{type: "json_object"},
+        stop:null  }
     return  callApi(apiUrl, apiKey, bodyData);
 }
 
@@ -261,7 +328,7 @@ async function callApi(apiUrl, apiKey, bodyData) {
             
         if (response.ok) {
             const data = await response.json();
-            console.log(data.choices[0].message?.content, '<---- groq.com api');
+            console.log(data.choices[0].message?.content, '<---- api');
 
             return JSON.parse(data.choices[0].message?.content);
         } else {
