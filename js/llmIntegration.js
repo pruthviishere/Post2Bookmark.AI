@@ -222,8 +222,16 @@ async function categorizeWithOllama(prompt, model) {
 }
 
 async function categorizeWithOpenAI(prompt, model, apiKey) {
-    const apiUrl = "https://api.openai.com/v1/completions";
-    return await callApi(apiUrl, apiKey, { model, prompt });
+     
+    const apiUrl = "https://api.openai.com/v1/chat/completions";  // ✅ Correct endpoint
+
+    const bodyData = {
+        model,
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }
+    };
+    // return await callApi(apiUrl, apiKey, { model, prompt });
+    return await callApi(apiUrl, apiKey, bodyData);
 }
 
 async function categorizeWithBedrock(prompt, model, apiKey, apiUrl) {
@@ -240,7 +248,12 @@ async function categorizeWithGemini(prompt, model, apiKey) {
         apiUrl = "https://api.groq.com/openai/v1/chat/completions"
         console.log("categorizeWithGroq api url was not valid setting default one https://api.groq.com/openai/v1/chat/completions")
     }
-    let bodyData = { model,stream: false, messages: [{ role: "user", content: prompt }],   response_format:{type: "json_object"},stop:null  }
+    let bodyData = { 
+        model,
+        stream: false, 
+        messages: [{ role: "user", content: prompt }],
+        response_format:{type: "json_object"},
+        stop:null  }
     return  callApi(apiUrl, apiKey, bodyData);
 }
 
@@ -261,7 +274,7 @@ async function callApi(apiUrl, apiKey, bodyData) {
             
         if (response.ok) {
             const data = await response.json();
-            console.log(data.choices[0].message?.content, '<---- groq.com api');
+            console.log(data.choices[0].message?.content, '<---- api');
 
             return JSON.parse(data.choices[0].message?.content);
         } else {
