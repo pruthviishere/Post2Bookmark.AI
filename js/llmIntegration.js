@@ -141,7 +141,7 @@ export function categorizePostMulti(text) {
                     categorizeWithBedrock(prompt,  model,  apiKey,  apiUrl).then(resolve).catch(reject);
                     break;
                 case "gemini":
-                    categorizeWithGemini(prompt,  model,  apiKey).then(resolve).catch(reject);
+                    generateContentWithGemini(prompt,  model,  apiKey).then(resolve).catch(reject);
                     break;
                 case "groq":
                     categorizeWithGroq(prompt,  model,  apiKey,  apiUrl).then(resolve).catch(reject);
@@ -241,6 +241,60 @@ async function categorizeWithBedrock(prompt, model, apiKey, apiUrl) {
 async function categorizeWithGemini(prompt, model, apiKey) {
     const apiUrl = `https://generativelanguage.googleapis.com/v1/models/${model}:generateText`;
     return await callApi(apiUrl, apiKey, { prompt });
+}
+async function generateContentWithGemini(prompt, model, apiKey) {
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+    const bodyData = {
+        contents: [{
+            parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+            response_mime_type: "application/json"
+        }
+    };
+
+    return await callGeminiApi(apiUrl, bodyData);
+}
+
+async function callGeminiApi(apiUrl, bodyData) {
+    try {
+        const headers = {
+            "Content-Type": "application/json"
+        };
+
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(bodyData),
+        });
+
+        if (!response.ok) {
+            console.error("Error:", response.status, await response.text());
+            return null;
+        }
+
+        const data = await response.json();
+
+        // ✅ Extract response correctly
+        if (data.candidates && data.candidates.length > 0) {
+            const responseText = data.candidates[0].content.parts[0].text;
+            console.log("Gemini API Response:", responseText);
+
+            try {
+                return JSON.parse(responseText);  // ✅ Convert text response to JSON
+            } catch (e) {
+                console.warn("Response is not valid JSON, returning as string.");
+                return responseText;
+            }
+        } else {
+            console.error("Unexpected response structure:", data);
+            return null;
+        }
+    } catch (error) {
+        console.error("API call failed:", error);
+        return "FailedBookmarks";
+    }
 }
 
  function categorizeWithGroq(prompt, model, apiKey, apiUrl) {
