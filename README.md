@@ -1,90 +1,90 @@
-# Post2Bookmark.AI
+# 📌 Post2Bookmark.AI - Smarter LinkedIn Bookmarking with AI  
 
+![Post2Bookmark.AI](https://img.shields.io/badge/Chrome%20Extension-AI%20Powered-blue)  
+*A powerful Chrome extension that lets you save and categorize LinkedIn posts using AI—now with support for Ollama, Groq, OpenAI, and Gemini!* 🚀  
 
-📌  A lightweight Chrome extension that helps you save and categorize posts with a single click.it uses AI categorization to organize your bookmarks for easy access—all while keeping your data private and secure.
+---
 
+## ✨ Features  
+✅ **AI-Powered Categorization** – Organizes saved posts into relevant folders automatically.  
+✅ **Multi-LLM Support** – Choose from **Ollama, Groq, OpenAI, or Gemini** as your AI provider.  
+✅ **No Local AI Setup Needed** (for Groq, OpenAI, and Gemini) – Just add your **API keys** and start in **2 minutes**.  
+✅ **Full Local AI Support with Ollama** – Run AI **locally** with **no API dependency**.  
+✅ **Smart API Handling** –  
+   - No need to manually enter API URLs for **OpenAI & Gemini**.  
+   - **Ollama runs locally**, so no API key required.  
+✅ **Tested with Best Models**:  
+   - 🦙 **Ollama** → `llama3.2:latest`  
+   - ⚡ **Groq** → `llama-3.1-8b-instant`  
+   - 🤖 **OpenAI** → `gpt-4o-mini`  
+   - 🌟 **Gemini** → `gemini-2.0-flash`  
+✅ **One-Click Bookmarking** – Save LinkedIn posts instantly with AI-powered categorization.  
 
-🌟 Features
-Save Posts Instantly: A dedicated "Save" button makes bookmarking seamless.
+---
 
-AI-Powered Categorization: Automatically sorts bookmarks into relevant folders using advanced AI models (powered by Ollama).
+## 🔧 Prerequisites for Ollama Users  
+- **Ollama installed** and running locally.  
+- **Model required:** `llama3.2:latest`  
+- If using a **different Ollama model**, update the **`categorizeTextOllamaCustom`** method in `llmIntegration.js` at **line 102**.  
 
-Privacy First: Your data stays local. No external servers, no data collection.
+---
 
-Custom Folders: Organize your bookmarks into folders for better management.
+## 📥 Installation (For All Users)  
+### **1️⃣ Clone or Download**  
+```sh
+git clone https://github.com/yourusername/Post2Bookmark.AI.git
+cd Post2Bookmark.AI
+```
 
-prerequisites: Ollama , llama 3.2:latest
-if you are running other you need to change llmIntegration.js Method 
-categorizeTextOllamaCustom Line no 102 with your ollama model.
+## 2️⃣ Load the Extension in Chrome
 
-Will add support for OpenAI API and other providers.
+1.  Open `chrome://extensions/`
+2.  Enable **Developer Mode** (top-right corner).
+3.  Click **"Load Unpacked"** and select the `Post2Bookmark.AI` folder.
 
+## 3️⃣ Setup API Keys (For Groq, OpenAI, or Gemini Users)
 
-🚀 Getting Started
-Installation
+1.  Click the `Post2Bookmark.AI` extension icon in Chrome.
+2.  Select your LLM provider (Groq, OpenAI, Gemini).
+3.  Provide your API key and model name. OpenAI & Gemini do **NOT** require an API URL.
+4.  Save settings and start bookmarking! 🚀
 
+## 🔧 Setup for Ollama (Local AI)
 
-git releases 
-download zip or clone repo
-Open Chrome and go to:
-chrome://extensions/
+1.  Install Ollama from [Ollama's official site](https://ollama.com/).
+2.  Make sure `llama3.2:latest` is installed and running:
 
-Enable Developer Mode (top-right corner).
+    ```sh
+    ollama run llama3.2
+    ```
 
-Click Load Unpacked and select the folder where you cloned this repository.
+3.  If using a different model, update `llmIntegration.js` at line 102.
+4.  Restart Ollama if needed:
 
-Allow ollama access 
-All bookmarks are stored locally on your machine.
-make sure llama3.2:latest is install and running as ollama device
-https://github.com/ollama/ollama/issues/4115#issuecomment-2254177024
-after the executing command you need to restart Ollama.
+    ```sh
+    sudo systemctl restart ollama
+    ```
 
-The extension is now ready to use! 🎉
+## 🛠 Supported Models & Providers
 
-🛠️ How It Works
-When you browse LinkedIn or other websites, click the "Save" button on the post to bookmark it.
-The extension uses Ollama AI models to categorize the post into pre-defined categories such as:
-        Job Opportunity in AI/ML/DS,
-        Job Opportunity in Software Engineer,
-        AI Agents/RAG,
-        Interview Preparation or Experiences,
-        GitHub Repositories,
-        Career Update,
-        Data Structures & Algorithms,
-        Java,
-        System Design,
-        Other Learning Resource,
-        Data Science,
-        AI News,
-        Other News,
-        Startup/Entrepreneurship.
-       
-And more!
-Saved bookmarks are stored locally in your browser’s Bookmark Manager under the folder “Post2Bookmark.AI”.
+| Provider         | Model               |
+| ---------------- | ------------------- |
+| Ollama (Local)   | `llama3.2:latest`  |
+| Groq             | `llama-3.1-8b-instant` |
+| OpenAI           | `gpt-4o-mini`       |
+| Gemini           | `gemini-2.0-flash`  |
 
+## 🔐 Privacy & Security
 
-🔐 Privacy Policy
-This extension does not collect, track, or send user data to any external servers.
+* **Ollama Mode** – No internet required. All processing happens locally.
+* **Cloud AI Mode (Groq/OpenAI/Gemini)** – Your API keys are stored securely in Chrome storage.
 
-All bookmarks are stored locally on your machine.
+## 📢 Feedback & Issues
 
+Found a bug? Have suggestions? Open an issue in this repo!
 
-🤝 Contributing
-It is in development phase you might encounter issue, please report in Issues section.
-Contributions are welcome! If you have ideas, suggestions, or want to improve the extension:
+🔗 **GitHub Repo:** [Post2Bookmark.AI](https://github.com/pruthviishere/Post2Bookmark.AI)
 
-Fork the repository.
-Make your changes.
-Submit a pull request.
-We’d love to hear from you!
+🔥 Star this repo if you find it useful! ⭐
 
-
-🧠 Powered By
-Ollama: AI-based categorization.
-Chrome Extensions API
-📧 Contact Us
-If you have questions or need support, Open Issue
-
-⚖️ License
-This project is licensed under the GPL License.
-
+#AI #ChromeExtension #Ollama #Groq #OpenAI #Gemini #Bookmarking #Productivity
