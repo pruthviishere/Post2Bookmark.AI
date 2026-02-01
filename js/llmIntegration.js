@@ -123,13 +123,10 @@ export function categorizePostMulti(text) {
                 reject("API settings are missing.");
                 return;
             }
-            console.log("Retrieved settings:", settings);  // Debugging log
-
             const provider = settings.provider || "ollama";  // Default to Ollama
             const model = settings.model || "llama3.2";
             const apiKey = settings.apiKey || "";
             const apiUrl = settings.apiUrl || "http://localhost:11434/api/chat";
-            console.log(" settings.provider ",settings.provider," settings.apiKey ",settings.apiKey," settings.model ",settings.model)
             switch ( provider) {
                 case "ollama":
                     categorizeWithOllama(prompt,  model).then(resolve).catch(reject);
