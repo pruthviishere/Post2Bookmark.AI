@@ -21,7 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const apiUrl = apiUrlInput.value.trim();
 
         chrome.storage.sync.set({ provider, model, apiKey, apiUrl }, () => {
-            alert("API settings saved successfully!");
+            // Visual feedback instead of alert
+            saveButton.textContent = "Saved!";
+            saveButton.classList.add("saved");
+
+            setTimeout(() => {
+                saveButton.textContent = "Save";
+                saveButton.classList.remove("saved");
+            }, 2000);
         });
     });
 });
