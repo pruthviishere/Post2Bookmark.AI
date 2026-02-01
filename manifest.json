@@ -47,7 +47,10 @@
     "http://localhost/*",
     "https://localhost/*",
     "https://api.openai.com/*" ,
-    "https://generativelanguage.googleapis.com/*"
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.anthropic.com/*",
+    "https://openrouter.ai/*",
+    "https://api.groq.com/*"
   ],
 	"web_accessible_resources": [
 		{

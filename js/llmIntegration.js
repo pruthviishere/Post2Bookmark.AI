@@ -1,105 +1,6 @@
-// llmCategorizer.js
+// llmIntegration.js
 
-// Categorize a post using either Ollama or OpenAI
-export function categorizePost(text, useOllama) {
-    const prompt = `
-        You are a LinkedIn post categorization system.
-        Your task is to categorize it into a specific category such as:
-        Job Opportunity in AI/ML/DS,
-        Job Opportunity in Software Engineer,
-        AI Agents/RAG,
-        Interview Preparation or Experiences,
-        GitHub Repositories,
-        Career Update,
-        Data Structures & Algorithms,
-        Java,
-        System Design,
-        Other Learning Resource,
-        Data Science,
-        AI News,
-        Other News,
-        Startup/Entrepreneurship.
-        If no relevant category is found, return Miscellaneous.
-        Please categorize the text and return the result as a JSON object with a key 'category' that holds the category name.
-        Below is a LinkedIn post text.
-        Post text: "${text}"
-        Return the result in the following JSON format:
-        {"category": "<CATEGORY_NAME>"}.
-    `;
-    return new Promise((resolve, reject) => {
-        try {
-            if (useOllama) {
-                categorizeTextOllamaCustom(prompt)
-                    .then(resolve)
-                    .catch(reject);
-            } else {
-                categorizeWithOpenAI(prompt)
-                    .then(resolve)
-                    .catch(reject);
-            }
-        } catch (error) {
-            console.error("Error in categorizePost:", error);
-            reject(error);
-        }
-    });
-}
-
-
-// The categorizeTextOllamaCustom function using fetch API instead of jQuery AJAX
-export async function categorizeTextOllamaCustom(prompt) {
-    const apiUrl = "http://localhost:11434/api/generate"; // Replace with your actual ChatOllama endpoint
-    const modelConfig = {
-        model: "llama3.2", // Model to use (can be adjusted based on your setup)
-        prompt: prompt,
-        temperature: 0.8,
-        num_predict: 256,
-        format: "json",
-        stream: false
-    };
-
-    try {
-        // Make the API call using fetch
-        const response = await fetch(apiUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Origin": "http://localhost:11434",
-            },
-            body: JSON.stringify(modelConfig),
-        });
-
-        // Check if the response was successful
-        if (!response.ok) {
-            throw new Error(`API call failed with status: ${response.status}`);
-        }
-         // Log the raw response text
-        const rawText = await response.text();
-        console.log("Raw response text:", rawText);
-
-        // Parse the response as JSON
-        const data = JSON.parse(rawText);
-        console.log("Parsed JSON data:", data)
-
-        // Parse the response as JSON
-        // const data = await response.json();
-        console.log("response from llm",data)
-        const responseDTO = JSON.parse(data.response);
-        const category = responseDTO.category;
-        console.log("category ",category)
-        if (category) {
-            return { category };
-        } else {
-            // throw new Error("No category found in the response.");
-            category = "No category"
-            return { category }
-        } 
-
-    } catch (error) {
-        console.error("Error in categorizeTextOllamaCustom:", error);
-        category = "FailedBookmarks"
-            return { category }
-    }
-}
+// Orchestrator function to categorize post based on settings
 export function categorizePostMulti(text) {
     const prompt = `
         You are a LinkedIn post categorization system.
@@ -113,35 +14,40 @@ export function categorizePostMulti(text) {
     return new Promise((resolve, reject) => {
         if (!chrome.storage || !chrome.storage.sync) {
             console.error("chrome.storage is not available.");
-            return { category: "Miscellaneous" };
+            resolve({ category: "Miscellaneous" });
+            return;
         }
        
         chrome.storage.sync.get(["provider", "model", "apiKey", "apiUrl"], (settings) => {
             
-            if (!settings.provider || !settings.model) {
+            if (!settings.provider) {
                 console.error("API settings are missing.");
                 reject("API settings are missing.");
                 return;
             }
-            const provider = settings.provider || "ollama";  // Default to Ollama
+            const provider = settings.provider || "ollama";
             const model = settings.model || "llama3.2";
             const apiKey = settings.apiKey || "";
-            const apiUrl = settings.apiUrl || "http://localhost:11434/api/chat";
-            switch ( provider) {
+            // Default API URL logic can be handled inside specific functions if not provided
+
+            switch (provider) {
                 case "ollama":
-                    categorizeWithOllama(prompt,  model).then(resolve).catch(reject);
+                    categorizeWithOllama(prompt, model).then(resolve).catch(reject);
                     break;
                 case "openai":
-                    categorizeWithOpenAI(prompt,  model,  apiKey).then(resolve).catch(reject);
-                    break;
-                case "bedrock":
-                    categorizeWithBedrock(prompt,  model,  apiKey,  apiUrl).then(resolve).catch(reject);
+                    categorizeWithOpenAI(prompt, model, apiKey).then(resolve).catch(reject);
                     break;
                 case "gemini":
-                    generateContentWithGemini(prompt,  model,  apiKey).then(resolve).catch(reject);
+                    categorizeWithGemini(prompt, model, apiKey).then(resolve).catch(reject);
                     break;
                 case "groq":
-                    categorizeWithGroq(prompt,  model,  apiKey,  apiUrl).then(resolve).catch(reject);
+                    categorizeWithGroq(prompt, model, apiKey, settings.apiUrl).then(resolve).catch(reject);
+                    break;
+                case "anthropic":
+                    categorizeWithAnthropic(prompt, model, apiKey).then(resolve).catch(reject);
+                    break;
+                case "openrouter":
+                    categorizeWithOpenRouter(prompt, model, apiKey).then(resolve).catch(reject);
                     break;
                 default:
                     reject("Invalid provider selected.");
@@ -149,97 +55,159 @@ export function categorizePostMulti(text) {
         });
     });
 }
+
+// Deprecated single-use function (kept for compatibility if needed, but implementation redirects to multi)
+export function categorizePost(text, useOllama) {
+    return categorizePostMulti(text);
+}
+
 async function categorizeWithOllama(prompt, model) {
-    // const apiUrl = "http://localhost:11434/api/chat";
-    // return await callApi(apiUrl, null, { model, messages: [{ role: "user", content: prompt }] });
-    // export async function categorizeTextOllamaCustom(prompt, model) {
-        const apiUrl = "http://localhost:11434/api/chat"; // Ollama API endpoint
+    const apiUrl = "http://localhost:11434/api/chat";
     
-        const requestBody = {
-            model: model,
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.8,
-            format: "json",
-            stream: false
-        };
-    
-        try {
-            // Fetch API request to Ollama
-            const response = await fetch(apiUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Origin": "http://localhost:11434",
-                },
-                body: JSON.stringify(requestBody),
-            });
-    
-            // Check if API response was successful
-            if (!response.ok) {
-                throw new Error(`Ollama API call failed with status: ${response.status}`);
-            }
-    
-            // Read the raw response text
-            const rawText = await response.text();
-            console.log("Raw response text:", rawText);
-    
-            // Try parsing the response JSON directly
-            let data;
-            try {
-                data = JSON.parse(rawText);
-            } catch (error) {
-                console.error("Failed to parse Ollama response as JSON:", error);
-                throw new Error("Ollama response is not valid JSON.");
-            }
-         
-    
-            // Handle older Ollama versions where response is double-encoded
-            let responseDTO;
-            try {
-                responseDTO = JSON.parse(data.message.content); // Older Ollama versions
-            } catch (error) {
-                responseDTO = data; // Newer Ollama versions already return JSON
-            }
-    
-            // Extract category
-            const category = responseDTO.category;
-            console.log("Extracted category:", category);
-    
-            if (category) {
-                return { category };
-            } else {
-                throw new Error("No category found in the response.");
-            }
-        } catch (error) {
-            console.error("Error in categorizeTextOllamaCustom:", error);
-            throw new Error("Failed to process response from Ollama.");
+    const requestBody = {
+        model: model,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.8,
+        format: "json",
+        stream: false
+    };
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                // "Origin": "http://localhost:11434", // Usually not needed for localhost to localhost, but might be for extensions
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ollama API call failed with status: ${response.status}`);
         }
-    
-    
+
+        const data = await response.json();
+
+        // Handle response content
+        let content = data.message?.content;
+        if (!content) throw new Error("No content in Ollama response");
+
+        // Parse JSON if it's a string
+        if (typeof content === 'string') {
+            try {
+                return JSON.parse(content);
+            } catch (e) {
+                console.error("Failed to parse Ollama content as JSON", content);
+                // Try to fallback
+                return { category: "Miscellaneous" };
+            }
+        }
+        return content;
+
+    } catch (error) {
+        console.error("Error in categorizeWithOllama:", error);
+        return { category: "FailedBookmarks" };
+    }
 }
 
 async function categorizeWithOpenAI(prompt, model, apiKey) {
-     
-    const apiUrl = "https://api.openai.com/v1/chat/completions";  // ✅ Correct endpoint
-
+    const apiUrl = "https://api.openai.com/v1/chat/completions";
     const bodyData = {
         model,
         messages: [{ role: "user", content: prompt }],
         response_format: { type: "json_object" }
     };
-    // return await callApi(apiUrl, apiKey, { model, prompt });
     return await callApi(apiUrl, apiKey, bodyData);
 }
 
-async function categorizeWithBedrock(prompt, model, apiKey, apiUrl) {
-    return await callApi(apiUrl, apiKey, { model, prompt });
+async function categorizeWithAnthropic(prompt, model, apiKey) {
+    const apiUrl = "https://api.anthropic.com/v1/messages";
+    const bodyData = {
+        model: model,
+        max_tokens: 1024,
+        messages: [{ role: "user", content: prompt }]
+    };
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "x-api-key": apiKey,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json"
+            },
+            body: JSON.stringify(bodyData)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Anthropic API error: ${response.status} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        const content = data.content[0].text;
+
+        try {
+            return JSON.parse(content);
+        } catch (e) {
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                return JSON.parse(jsonMatch[0]);
+            }
+            throw new Error("Failed to parse JSON from Anthropic response");
+        }
+
+    } catch (error) {
+        console.error("Error in categorizeWithAnthropic:", error);
+        return { category: "FailedBookmarks" };
+    }
+}
+
+async function categorizeWithOpenRouter(prompt, model, apiKey) {
+    const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
+    const bodyData = {
+        model: model,
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }
+    };
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://github.com/Pruthvi360/Post2Bookmarks",
+                "X-Title": "Post2Bookmarks.AI"
+            },
+            body: JSON.stringify(bodyData)
+        });
+
+        if (!response.ok) {
+             const errorText = await response.text();
+            throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        const content = data.choices[0].message.content;
+
+        if (typeof content === 'string') {
+             try {
+                return JSON.parse(content);
+            } catch (e) {
+                 return { category: "Miscellaneous" };
+            }
+        }
+        return content;
+
+    } catch (error) {
+        console.error("Error in categorizeWithOpenRouter:", error);
+        return { category: "FailedBookmarks" };
+    }
 }
 
 async function categorizeWithGemini(prompt, model, apiKey) {
-    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/${model}:generateText`;
-    return await callApi(apiUrl, apiKey, { prompt });
-}
-async function generateContentWithGemini(prompt, model, apiKey) {
+    // Uses the v1beta generateContent API
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     const bodyData = {
@@ -251,10 +219,6 @@ async function generateContentWithGemini(prompt, model, apiKey) {
         }
     };
 
-    return await callGeminiApi(apiUrl, bodyData);
-}
-
-async function callGeminiApi(apiUrl, bodyData) {
     try {
         const headers = {
             "Content-Type": "application/json"
@@ -267,47 +231,48 @@ async function callGeminiApi(apiUrl, bodyData) {
         });
 
         if (!response.ok) {
-            console.error("Error:", response.status, await response.text());
-            return null;
+            console.error("Gemini Error:", response.status, await response.text());
+            return { category: "FailedBookmarks" };
         }
 
         const data = await response.json();
 
-        // ✅ Extract response correctly
         if (data.candidates && data.candidates.length > 0) {
             const responseText = data.candidates[0].content.parts[0].text;
-            console.log("Gemini API Response:", responseText);
-
             try {
-                return JSON.parse(responseText);  // ✅ Convert text response to JSON
+                return JSON.parse(responseText);
             } catch (e) {
-                console.warn("Response is not valid JSON, returning as string.");
-                return responseText;
+                console.warn("Response is not valid JSON, returning as is.");
+                return { category: "Miscellaneous" };
             }
         } else {
-            console.error("Unexpected response structure:", data);
-            return null;
+            console.error("Unexpected Gemini response structure:", data);
+            return { category: "FailedBookmarks" };
         }
     } catch (error) {
-        console.error("API call failed:", error);
-        return "FailedBookmarks";
+        console.error("Gemini API call failed:", error);
+        return { category: "FailedBookmarks" };
     }
 }
 
- function categorizeWithGroq(prompt, model, apiKey, apiUrl) {
-    if( apiUrl=="http://localhost:11434/api/chat" || !apiKey){
-        apiUrl = "https://api.groq.com/openai/v1/chat/completions"
-        console.log("categorizeWithGroq api url was not valid setting default one https://api.groq.com/openai/v1/chat/completions")
+function categorizeWithGroq(prompt, model, apiKey, apiUrl) {
+    const defaultUrl = "https://api.groq.com/openai/v1/chat/completions";
+    // If apiUrl is localhost (default from settings init) or empty, use default Groq URL
+    if (!apiUrl || apiUrl.includes("localhost")) {
+        apiUrl = defaultUrl;
     }
+
     let bodyData = { 
         model,
         stream: false, 
         messages: [{ role: "user", content: prompt }],
         response_format:{type: "json_object"},
-        stop:null  }
-    return  callApi(apiUrl, apiKey, bodyData);
+        stop:null
+    };
+    return callApi(apiUrl, apiKey, bodyData);
 }
 
+// Generic API caller for OpenAI-compatible endpoints
 async function callApi(apiUrl, apiKey, bodyData) {
     try {
         const headers = {
@@ -325,17 +290,24 @@ async function callApi(apiUrl, apiKey, bodyData) {
             
         if (response.ok) {
             const data = await response.json();
-            console.log(data.choices[0].message?.content, '<---- api');
+            const content = data.choices[0].message?.content;
+            console.log(content, '<---- api');
 
-            return JSON.parse(data.choices[0].message?.content);
+            if (typeof content === 'string') {
+                 try {
+                    return JSON.parse(content);
+                } catch (e) {
+                    return { category: "Miscellaneous" };
+                }
+            }
+            return content;
         } else {
             console.error(await response.json());
+             return { category: "FailedBookmarks" };
         }
         
     } catch (error) {
         console.error("API call failed:", error);
-        return "FailedBookmarks"
-        // throw new Error("Failed to process response.");
+        return { category: "FailedBookmarks" };
     }
 }
-
