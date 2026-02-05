@@ -100,6 +100,29 @@ export async function categorizeTextOllamaCustom(prompt) {
             return { category }
     }
 }
+let cachedSettings = null;
+
+if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
+    // Initialize cache
+    chrome.storage.sync.get(["provider", "model", "apiKey", "apiUrl"], (settings) => {
+        if (!chrome.runtime.lastError) {
+            cachedSettings = settings;
+        }
+    });
+
+    // Update cache on change
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+        if (namespace === 'sync' && cachedSettings) {
+            const keys = ["provider", "model", "apiKey", "apiUrl"];
+            keys.forEach(key => {
+                if (changes[key]) {
+                    cachedSettings[key] = changes[key].newValue;
+                }
+            });
+        }
+    });
+}
+
 export function categorizePostMulti(text) {
     const prompt = `
         You are a LinkedIn post categorization system.
@@ -115,9 +138,8 @@ export function categorizePostMulti(text) {
             console.error("chrome.storage is not available.");
             return { category: "Miscellaneous" };
         }
-       
-        chrome.storage.sync.get(["provider", "model", "apiKey", "apiUrl"], (settings) => {
-            
+
+        const runWithSettings = (settings) => {
             if (!settings.provider || !settings.model) {
                 console.error("API settings are missing.");
                 reject("API settings are missing.");
@@ -146,7 +168,20 @@ export function categorizePostMulti(text) {
                 default:
                     reject("Invalid provider selected.");
             }
-        });
+        };
+
+        if (cachedSettings) {
+            runWithSettings(cachedSettings);
+        } else {
+            chrome.storage.sync.get(["provider", "model", "apiKey", "apiUrl"], (settings) => {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError);
+                    return;
+                }
+                cachedSettings = settings;
+                runWithSettings(settings);
+            });
+        }
     });
 }
 async function categorizeWithOllama(prompt, model) {
