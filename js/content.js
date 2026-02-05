@@ -50,14 +50,42 @@ $('body').on('click', '.save_post_button', function () {
     }
     addBookmarkMethod(requestDto)
 });
-    // Add Save button dynamically
-    document.addEventListener('scroll', function () {
-        $(".feed-shared-social-action-bar").each(function () {
-            if ($(this).find(".save_post_button").length === 0) {
-                $(this).append(buttonHTML);
+    // Function to add the save button to a specific container
+    function addSaveButtonToContainer(container) {
+        if ($(container).find(".save_post_button").length === 0) {
+            $(container).append(buttonHTML);
+        }
+    }
+
+    // Initial check for existing posts
+    $(".feed-shared-social-action-bar").each(function () {
+        addSaveButtonToContainer(this);
+    });
+
+    // Use MutationObserver to add Save button dynamically to new posts
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.addedNodes.length) {
+                $(mutation.addedNodes).each(function() {
+                    if (this.nodeType === 1) {
+                        // Check if the added node itself is the target
+                        if ($(this).hasClass('feed-shared-social-action-bar')) {
+                            addSaveButtonToContainer(this);
+                        }
+                        // Also check descendants
+                        $(this).find(".feed-shared-social-action-bar").each(function () {
+                            addSaveButtonToContainer(this);
+                        });
+                    }
+                });
             }
         });
-    }, true);
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
 
     // Close the bookmark folder popup
     $("body").on('click', '.bookmark_folder_popup_close', function () {
