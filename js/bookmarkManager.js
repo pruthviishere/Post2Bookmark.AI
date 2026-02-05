@@ -6,15 +6,35 @@
  */
 function findFolderByName(bookmarks, folderName) {
     // console.log("findFolderByName folderName:",folderName)
+    // Check current level first
     for (let bookmark of bookmarks) {
         if (bookmark.title === folderName) {
-            console.log("bookmark found",bookmark)
+            console.log("bookmark found", bookmark);
             return bookmark;
         }
+    }
+
+    // Prioritize known locations: '2' (Other Bookmarks) then '1' (Bookmarks Bar)
+    const priorityIds = ['2', '1'];
+    for (let id of priorityIds) {
+        const target = bookmarks.find(b => b.id === id);
+        if (target && target.children) {
+            const found = findFolderByName(target.children, folderName);
+            if (found) {
+                console.log("folder found", found.id, found);
+                return found;
+            }
+        }
+    }
+
+    // Search in other folders
+    for (let bookmark of bookmarks) {
+        if (priorityIds.includes(bookmark.id)) continue;
+
         if (bookmark.children) {
             const found = findFolderByName(bookmark.children, folderName);
             if (found) {
-                console.log("folder found",found.id, found)
+                console.log("folder found", found.id, found);
                 return found;
             }
         }
