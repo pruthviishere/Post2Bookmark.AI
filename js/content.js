@@ -80,6 +80,12 @@ $('body').on('click', '.save_post_button', function () {
    function addBookmarkMethod(reqdto){
     console.log("Sending message to background:", reqdto);
     chrome.runtime.sendMessage({ message: "addBookmark",request:reqdto}, function (res) {
+       if (chrome.runtime.lastError) {
+           console.error("Error sending message:", chrome.runtime.lastError.message);
+           alert("Failed to communicate with the extension. Please refresh the page.");
+           return;
+       }
+
        console.log("res ",res)
        
        if (res) {
