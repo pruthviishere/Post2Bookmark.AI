@@ -27,9 +27,7 @@
     {
       "js": [
 	      "js/jquery.min.js",
-        "js/content.js",
-        "js/llmIntegration.js",
-        "js/bookmarkManager.js"
+        "js/content.js"
       ],
 	  "css": [
 	   "css/style.css"
